@@ -8,17 +8,8 @@ import Data.Functor as Functor
 -- Custom Parser Library
 import Core.ParserCombinator
 
-
--- ===================================================================================================
--- | Use a map `String -> [(String, String)]` to store a config file.
--- ===================================================================================================
-type Configs = Map String [(String, String)]
-
-insertConfig :: String -> (String, String) -> Configs -> Configs
-insertConfig section setting configs = alter f section configs
-    where
-        f Nothing = Just [setting]
-        f (Just settings') = Just (settings' ++ [setting])
+-- Import type `Configs`
+import TranslateConfigFiles.ConfigFilesCommon
 
 
 -- ===================================================================================================
@@ -52,6 +43,7 @@ readSection configs = do
 -- Read any number of Sections and check EOF.
 readSections :: Configs -> Parser Char Configs
 readSections configs = do
+        many matchEOL
         configs' <- recurseParser readSection configs
         many matchEOL
         checkEOF
@@ -59,7 +51,7 @@ readSections configs = do
 
 
 -- ===================================================================================================
--- | Convert a map of type `Configs = Map String [(String, String)]` like
+-- | Convert a map of type `Configs = Map String [(String, String)]` to string like
 -- |
 -- | ```
 -- | Section1.setting1=value1
@@ -76,7 +68,7 @@ writeSimple configs = foldlWithKey f "" configs
 
 
 -- ===================================================================================================
--- | Construct a traslation function
+-- | Construct a translation function
 -- ===================================================================================================
 sectionsToSimple :: String -> String
 sectionsToSimple = runParserAndPrint $ readSections (Map.empty :: Configs)
@@ -102,7 +94,7 @@ parse [inputFile, outputFile] = do
     return [inputString, outputFile]
 parse _ = usage >> exit
 
-usage   = putStrLn "Usage: sectionsToSimple [input_file_path] [output_file_path]"
+usage   = putStrLn "Usage: SectionsToSimple [input_file_path] [output_file_path]"
 exit    = exitWith ExitSuccess
 die     = exitWith (ExitFailure 1)
 

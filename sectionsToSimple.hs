@@ -79,25 +79,30 @@ writeSimple configs = foldlWithKey f "" configs
 -- | Construct a traslation function
 -- ===================================================================================================
 sectionsToSimple :: String -> String
-sectionsToSimple = runParserAndShow $ readSections (Map.empty :: Configs)
+sectionsToSimple = runParserAndPrint $ readSections (Map.empty :: Configs)
                                         <&> writeSimple
 
 
 -- ===================================================================================================
--- | TODO
--- | Add main method. Sources:
+-- | Add a main method which parses two inputs from the command line (input_file_path and
+-- | output_file_path) and translate the contents of the first file and stores the result
+-- | in the second file.
+-- |
+-- | Sources:
 -- |   - https://wiki.haskell.org/Tutorials/Programming_Haskell/Argument_handling
 -- ===================================================================================================
--- main = do
---     args <- getArgs
---     input <- parse args
---     putStr (sectionsToSimple input)
---
--- parse ["-h"] = usage >> exit
--- parse [] = getContents
--- parse file = concat `fmap` mapM readFile file
---
--- usage   = putStrLn "Usage: tac [-h] [file ..]"
--- exit    = exitWith ExitSuccess
--- die     = exitWith (ExitFailure 1)
+main = do
+    args <- getArgs
+    [inputString, outputFile] <- parse args
+    writeFile outputFile (sectionsToSimple inputString)
+
+parse :: [String] -> IO [String]
+parse [inputFile, outputFile] = do
+    inputString <- readFile inputFile
+    return [inputString, outputFile]
+parse _ = usage >> exit
+
+usage   = putStrLn "Usage: sectionsToSimple [input_file_path] [output_file_path]"
+exit    = exitWith ExitSuccess
+die     = exitWith (ExitFailure 1)
 

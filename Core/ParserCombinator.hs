@@ -25,10 +25,10 @@ data Parser token output = ParserCons ([token] -> (Either Error ([token], output
 runParser :: Parser token output -> [token] -> Either Error ([token], output)
 runParser (ParserCons parser) ts = parser ts
 
-runParserAndShow :: Show output => Parser token output -> [token] -> String
-runParserAndShow parser ts = either
+runParserAndPrint :: Parser token String -> [token] -> String
+runParserAndPrint parser ts = either
     (\err -> "Error:\n" ++ show err)
-    (\pair -> show (output pair))
+    (\pair -> output pair)
     (runParser parser ts)
 
 leftover = fst; output = snd
